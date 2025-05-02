@@ -1,13 +1,22 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report, confusion_matrix, auc
+from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 import numpy as np
 import shap
-from icecream import ic
+
 
 class ModelEvaluator:
-    def __init__(self,y_pred,y_pred_proba,y_test,X_test,random_search,categorical_cols,numerical_cols):
+    def __init__(
+        self,
+        y_pred,
+        y_pred_proba,
+        y_test,
+        X_test,
+        random_search,
+        categorical_cols,
+        numerical_cols,
+    ):
         self.y_test = y_test
         self.X_test = X_test
         self.y_pred = y_pred
@@ -18,85 +27,80 @@ class ModelEvaluator:
 
     def evaluate(self):
 
-        print("Classification Report:\n", classification_report(self.y_test, self.y_pred))
-        # print(self.__analyse_fail_rate())
+        print(
+            "Classification Report:\n", classification_report(self.y_test, self.y_pred)
+        )
         self.__plot_feature_importance()
-        self.__plot_shap_summary()
+        self.__plot_shap_summaries()
         self.__plot_confusion_matrix()
 
     def __plot_confusion_matrix(self):
-        cm = confusion_matrix(self.y_test, self.y_pred, labels=[0,1])
+        cm = confusion_matrix(self.y_test, self.y_pred, labels=[0, 1])
         cm_percent = cm / cm.sum() * 100
 
-        labels = np.array([f"{v}\n({p:.1f}%)" for v, p in zip(cm.flatten(), cm_percent.flatten())])
+        labels = np.array(
+            [f"{v}\n({p:.1f}%)" for v, p in zip(cm.flatten(), cm_percent.flatten())]
+        )
         labels = labels.reshape(cm.shape)
-        plt.figure(figsize=(6,4))
-        sns.heatmap(cm, annot=labels, fmt='', cmap="magma", cbar=False)
-        plt.xlabel('Predicted')
-        plt.ylabel('Real')
-        plt.title('Confusion Matrix')
+        plt.figure(figsize=(6, 4))
+        sns.heatmap(cm, annot=labels, fmt="", cbar=False)
+        plt.xlabel("Predicted")
+        plt.ylabel("Real")
+        plt.title("Confusion Matrix")
         plt.show()
 
-
     def __plot_feature_importance(self):
-        encoder = self.best_model.named_steps['preprocess'].transformers_[0][1] 
+        """Plots the top 10 most important features from the trained model."""
+        encoder = self.best_model.named_steps["preprocess"].transformers_[0][1]
         ohe_columns = encoder.get_feature_names_out(self.categorical_cols)
         all_columns = list(ohe_columns) + self.numerical_cols
 
-        model = self.best_model.named_steps['model']
-
+        model = self.best_model.named_steps["model"]
         importances = model.feature_importances_
 
-        plt.figure(figsize=(10, 6))
-        plt.barh(all_columns, importances, color='#f44f39')
-        for index, value in enumerate(importances):
-            plt.text(value, index, f'{value:.2f}', va='center', ha='left')
+        feature_importance = (
+            pd.DataFrame({"feature": all_columns, "importance": importances})
+            .sort_values(by="importance", ascending=False)
+            .head(10)
+        )
 
-        plt.title('Feature Importance')
-        plt.xlabel('Importance')
+        plt.figure(figsize=(10, 6))
+        plt.barh(
+            feature_importance["feature"],
+            feature_importance["importance"],
+            color="#d3436e",
+        )
+        for index, value in enumerate(feature_importance["importance"]):
+            plt.text(value, index, f"{value:.2f}", va="center", ha="left")
+
+        plt.title("Top 10 Most Important Features")
+        plt.xlabel("Importance")
+        plt.gca().invert_yaxis()
         plt.tight_layout()
         plt.show()
-    
-    # def __analyse_fail_rate(self):
-    #     """
-    #     Analyze the difference in failure rate between the model's predictions and the actual test set.
 
-    #     This function calculates the percentage of predicted failures and compares it to the true failure rate in the test set.
-    #     It then returns a conclusion about whether the model is more or less sensitive to failures compared to the real data.
-
-    #     Returns:
-    #         str: A message describing the change in predicted failure rate relative to the actual rate.
-    #     """
-    #     y_test_dist = pd.Series(self.y_test).value_counts(normalize=True)
-    #     y_pred_dist = pd.Series(self.y_pred).value_counts(normalize=True)
-
-    #     y_test_rate = y_test_dist.get(1, 0)
-    #     y_pred_rate = y_pred_dist.get(1, 0)
-
-    #     impact = (y_pred_rate - y_test_rate) * 100
-    #     if impact > 0:
-    #         conclusion = (
-    #             f"The model predicted {impact:.1f}% more failures than the actual base rate "
-    #             f"potentially increasing sensitivity to early signs of failure."
-    #         )
-    #     elif impact < 0:
-    #         conclusion = (
-    #             f"The model predicted {abs(impact):.1f}% fewer failures than the actual base rate, "
-    #             f"which may indicate under-detection of failure conditions."
-    #         )
-    #     else:
-    #         conclusion = (
-    #             "The model predicted failures at the same rate as the actual base, indicating neutral alignment with reality."
-    #         )
-    #     return conclusion
-
-    def __plot_shap_summary(self):
-        preprocessor = self.best_model.named_steps['preprocess']
-        X_test_transformed = preprocessor.transform(self.X_test)
+    def __plot_shap_summaries(self):
+        """Plots SHAP summary plots for the model's predictions."""
+        preprocessor = self.best_model.named_steps["preprocess"]
+        model = self.best_model.named_steps["model"]
         feature_names = preprocessor.get_feature_names_out()
 
-        explainer = shap.TreeExplainer(self.best_model.named_steps['model'])
+        X_test_transformed = preprocessor.transform(self.X_test)
+        if hasattr(X_test_transformed, "toarray"):
+            X_test_transformed = X_test_transformed.toarray()
 
+        explainer = shap.TreeExplainer(model)
         shap_values = explainer.shap_values(X_test_transformed)
-        shap.summary_plot(shap_values, X_test_transformed, feature_names=feature_names)
-        shap.summary_plot(shap_values[1], X_test_transformed, feature_names=feature_names, plot_type='dot')
+
+        shap.summary_plot(
+            shap_values,
+            X_test_transformed,
+            feature_names=feature_names,
+            plot_type="bar",
+        )
+        shap.summary_plot(
+            shap_values[1],
+            X_test_transformed,
+            feature_names=feature_names,
+            plot_type="dot",
+        )

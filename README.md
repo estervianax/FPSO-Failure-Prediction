@@ -66,14 +66,17 @@ FPSO-failure-prediction/
 
 ## Usage
 
-You can see the whole procject in hmlr or execute a simple step workflow organized in a Jupyter notebook:
+You can explore the entire project in a HTML format or execute, step-by-step workflow organized in a Jupyter Notebook:
 
-- **Notebook**: `FPSO_failure_prediction.ipynb`
-- **Description**:
-  - Clean and inspect sensor and preset data.
-  - Identify which variables behaves precede failure.
-  - Prdict failures using machine learning model
-  - evaluate model performance
+### HTML: `FPSO_failure_prediction.html`  
+### Notebook: `FPSO_failure_prediction.ipynb`
+
+**Description**:
+- Clean and inspect sensor data.
+- Identify which variables behave impact equipment failure.
+- Predict failures using a machine learning model.
+- Evaluate model performance with relevant metrics and visualizations.
+
 ---
 
 ## Code Overview
@@ -91,4 +94,4 @@ You can see the whole procject in hmlr or execute a simple step workflow organiz
 
 - **LSTM Modeling**: Implement Long Short-Term Memory (LSTM) networks to better capture temporal dependencies and patterns in the time-series sensor data, potentially improving failure prediction accuracy.
 - **Statistical Testing**: Conduct t-tests to evaluate whether the mean values of key features differ significantly prior to failure events, offering stronger statistical validation of feature relevance. Taking into account potential feature dependencies.
-
+- **Class Imbalance Handling**: Although the model already incorporates class weights to address imbalance, further improvements could be achieved through resampling techniques. This may help the model better detect rare failure events and improve recall even further.
