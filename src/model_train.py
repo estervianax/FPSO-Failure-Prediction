@@ -35,7 +35,7 @@ class ModelTrainer:
     def __prepare_data_training(self,df):
         X = self.df[self.categorical_cols + self.numerical_cols]
         y = df[self.target]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.3)
         return X_train, X_test, y_train, y_test 
     
     def __create_pipeline(self):
@@ -62,10 +62,6 @@ class ModelTrainer:
             verbosity = -1,
             class_weight ='balanced',
             random_state = 26)
-        #     n_estimators=200,
-        #     learning_rate=0.05,
-        #     num_leaves=31,
-        #     max_depth=6,
 
         pipeline = Pipeline(steps=[
             ('preprocess', preprocessor),

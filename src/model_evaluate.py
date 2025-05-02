@@ -19,7 +19,7 @@ class ModelEvaluator:
     def evaluate(self):
 
         print("Classification Report:\n", classification_report(self.y_test, self.y_pred))
-        print(self.__analyse_fail_rate())
+        # print(self.__analyse_fail_rate())
         self.__plot_feature_importance()
         self.__plot_shap_summary()
         self.__plot_confusion_matrix()
@@ -56,53 +56,39 @@ class ModelEvaluator:
         plt.xlabel('Importance')
         plt.tight_layout()
         plt.show()
-
+    
     # def __analyse_fail_rate(self):
+    #     """
+    #     Analyze the difference in failure rate between the model's predictions and the actual test set.
+
+    #     This function calculates the percentage of predicted failures and compares it to the true failure rate in the test set.
+    #     It then returns a conclusion about whether the model is more or less sensitive to failures compared to the real data.
+
+    #     Returns:
+    #         str: A message describing the change in predicted failure rate relative to the actual rate.
+    #     """
     #     y_test_dist = pd.Series(self.y_test).value_counts(normalize=True)
     #     y_pred_dist = pd.Series(self.y_pred).value_counts(normalize=True)
 
-    #     y_test_rate = y_test_dist[1]
-    #     y_pred_rate = y_pred_dist[1]
+    #     y_test_rate = y_test_dist.get(1, 0)
+    #     y_pred_rate = y_pred_dist.get(1, 0)
 
     #     impact = (y_pred_rate - y_test_rate) * 100
-    #     if impact >= 0:
-    #         conclusion = (f"The model increased the fail rate by +{impact:.1f}% compared to the actual base.") #TODO
+    #     if impact > 0:
+    #         conclusion = (
+    #             f"The model predicted {impact:.1f}% more failures than the actual base rate "
+    #             f"potentially increasing sensitivity to early signs of failure."
+    #         )
+    #     elif impact < 0:
+    #         conclusion = (
+    #             f"The model predicted {abs(impact):.1f}% fewer failures than the actual base rate, "
+    #             f"which may indicate under-detection of failure conditions."
+    #         )
     #     else:
-    #         conclusion = (f"The model reduced the fail rate by {abs(impact):.1f}% compared to the actual base.")   #TODO
+    #         conclusion = (
+    #             "The model predicted failures at the same rate as the actual base, indicating neutral alignment with reality."
+    #         )
     #     return conclusion
-    
-    def __analyse_fail_rate(self):
-        """
-        Analyze the difference in failure rate between the model's predictions and the actual test set.
-
-        This function calculates the percentage of predicted failures and compares it to the true failure rate in the test set.
-        It then returns a conclusion about whether the model is more or less sensitive to failures compared to the real data.
-
-        Returns:
-            str: A message describing the change in predicted failure rate relative to the actual rate.
-        """
-        y_test_dist = pd.Series(self.y_test).value_counts(normalize=True)
-        y_pred_dist = pd.Series(self.y_pred).value_counts(normalize=True)
-
-        y_test_rate = y_test_dist.get(1, 0)
-        y_pred_rate = y_pred_dist.get(1, 0)
-
-        impact = (y_pred_rate - y_test_rate) * 100
-        if impact > 0:
-            conclusion = (
-                f"The model predicted {impact:.1f}% more failures than the actual base rate, "
-                f"potentially increasing sensitivity to early signs of failure."
-            )
-        elif impact < 0:
-            conclusion = (
-                f"The model predicted {abs(impact):.1f}% fewer failures than the actual base rate, "
-                f"which may indicate under-detection of failure conditions."
-            )
-        else:
-            conclusion = (
-                "The model predicted failures at the same rate as the actual base, indicating neutral alignment with reality."
-            )
-        return conclusion
 
     def __plot_shap_summary(self):
         preprocessor = self.best_model.named_steps['preprocess']
