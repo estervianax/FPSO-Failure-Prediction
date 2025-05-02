@@ -16,27 +16,27 @@ Final outputs include:
 ---
 
 ## Project Structure
-FPSO-failure-prediction/
-├── data/
-│ └── O_G_Equipment_Data.xlsx
-│
-├── notebooks/
-│ └── FPSO_failure_prediction.ipynb
-│
-├── presentation/
-│ └── FPSO_failure_prediction.html
-│
-├── src/
-│ ├── init.py
-│ ├── data_exploration.py
-│ ├── data_preprocessing.py
-│ ├── model_evaluate.py
-│ └── model_train.py
-│
-├── .gitignore
-├── setup.py
-├── requirements.txt
-└── README.md
+FPSO-failure-prediction/  
+├── data/  
+│ └── O_G_Equipment_Data.xlsx  
+│  
+├── notebooks/  
+│ └── FPSO_failure_prediction.ipynb  
+│  
+├── presentation/  
+│ └── FPSO_failure_prediction.html  
+│  
+├── src/   
+│ ├── init.py  
+│ ├── data_exploration.py  
+│ ├── data_preprocessing.py  
+│ ├── model_evaluate.py  
+│ └── model_train.py  
+│  
+├── .gitignore  
+├── setup.py  
+├── requirements.txt  
+└── README.md  
 
 
 ## Installation
